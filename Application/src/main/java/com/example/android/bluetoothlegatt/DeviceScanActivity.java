@@ -16,7 +16,9 @@
 
 package com.example.android.bluetoothlegatt;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,6 +26,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -160,6 +163,18 @@ public class DeviceScanActivity extends ListActivity {
 
     private void scanLeDevice(final boolean enable) {
         if (enable) {
+            // ask permission API>23
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(getText(R.string.location_permission_title));
+                    builder.setMessage(getText(R.string.location_permission_message));
+                    builder.setPositiveButton(android.R.string.ok,
+                            (dialog, which) -> requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0));
+                    builder.show();
+                    return;
+                }
+            }
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override
